@@ -50,7 +50,8 @@ class LlmUtil():
         self.pre_prompt = llm_config.params['PRE_PROMPT'] # type: str
         self.word_limit = llm_config.params['WORD_LIMIT']
         self.short_word_limit = llm_config.params['SHORT_WORD_LIMIT']
-        
+        self.show_original_text = llm_config.params.get('SHOW_ORIGINAL_TEXT', True)
+
         self.__story = None # type: DynamicStory
         self.io_util = io_util or IoUtil(config=llm_config.params, backend_config=backend_config)
         self.stream = backend_config['STREAM']
@@ -77,8 +78,6 @@ class LlmUtil():
         """Evoke a response from LLM. Async if stream is True, otherwise synchronous.
         Update the rolling prompt with the latest message.
         Will put generated text in lm_cache.look_hashes, and reuse it if same hash is generated."""
-        output_template = 'Original:[<it><rev> {message}</>] <bright><rev>Generated:</>{text}'
-
         if not message or str(message) == "\n":
             str(message), rolling_prompt
 
@@ -88,7 +87,7 @@ class LlmUtil():
 
         cached_look = llm_cache.get_looks([text_hash_value])
         if cached_look:
-            return output_template.format(message=message, text=cached_look), rolling_prompt
+            return self._format_evoke(message, cached_look), rolling_prompt
         trimmed_message = parse_utils.remove_special_chars(str(message))
         time_of_day = ''
         if self.__story.config.day_night:
@@ -107,13 +106,19 @@ class LlmUtil():
         if not self.stream:
             text = self.io_util.synchronous_request(request_body, prompt=prompt, context=story_context.to_prompt_string())
             llm_cache.cache_look(text, text_hash_value)
-            return output_template.format(message=message, text=text), rolling_prompt
-        if self.connection:
-            self.connection.output(output_template.format(message=message, text=''))
+            return self._format_evoke(message, text), rolling_prompt
+        if self.connection and self.show_original_text:
+            self.connection.output(self._format_evoke(message, ''))
         text = self.io_util.stream_request(request_body=request_body, prompt=prompt, context=story_context.to_prompt_string(), io=self.connection)
         llm_cache.cache_look(text, text_hash_value)
         return '\n', rolling_prompt
-    
+
+    def _format_evoke(self, message: str, text: str) -> str:
+        """ Show original and generated text side by side, or only the generated text (falling back to the original if generation failed) """
+        if not self.show_original_text:
+            return text if text and text.strip() else message
+        return 'Original:[<it><rev> {message}</>] <bright><rev>Generated:</>{text}'.format(message=message, text=text)
+
     def generate_dialogue(self, conversation: str, 
                           character_card: CharacterCard, 
                           character_name: str, 

@@ -60,6 +60,20 @@ class TestLlmUtils():
         assert(result)
         assert(llm_cache.get_looks([llm_cache.generate_hash('test evoke')]) == evoke_string)
 
+    def test_evoke_hide_original_text(self):
+        self.llm_util.set_story(self.story)
+        self.llm_util.show_original_text = False
+        try:
+            self.llm_util.io_util = FakeIoUtil(response='generated look')
+            result, _ = self.llm_util.evoke(message='hidden original')
+            assert result == 'generated look'
+            # falls back to the original when nothing was generated
+            self.llm_util.io_util = FakeIoUtil(response='')
+            result, _ = self.llm_util.evoke(message='hidden original, no response')
+            assert result == 'hidden original, no response'
+        finally:
+            self.llm_util.show_original_text = True
+
     def test_generate_character(self):
         character_string = json.dumps(parse_utils.load_json('tests/files/test_character.json'))
         self.llm_util._character.io_util = FakeIoUtil(response = character_string)
