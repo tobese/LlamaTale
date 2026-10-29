@@ -1,0 +1,9 @@
+URL: "http://q-bert.bearded-panga.ts.net:11434"
+ENDPOINT: "/v1/chat/completions"
+STREAM_ENDPOINT: "/v1/chat/completions"
+STREAM: False
+JSON_GRAMMAR_KEY: "grammar_string"
+OPENAI_HEADERS: '{"Content-Type":"application/json"}'
+DEFAULT_BODY: '{"model":"gemma3-12b-8k", "messages":[{"role":"system", "content":"You are an assistant game keeper for an RPG"}, {"role":"user", "content":""}], "temperature": 1.0, "max_tokens":1500, "stop": "\n\n\n"}'
+OPENAI_API_KEY: "ollama"
+OPENAI_JSON_FORMAT: '{"type":"json_object"}'

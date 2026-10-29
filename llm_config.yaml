@@ -1,9 +1,9 @@
 WORD_LIMIT: 200
 SHORT_WORD_LIMIT: 25
-BACKEND: kobold_cpp
+BACKEND: ollama
 MEMORY_SIZE: 512
 UNLIMITED_REACTS: false
-SHOW_ORIGINAL_TEXT: true # false shows only the LLM generated text (falls back to the original if generation fails)
+SHOW_ORIGINAL_TEXT: false # false shows only the LLM generated text (falls back to the original if generation fails)
 ACTION_LIST:
 - move, say, attack, wear, remove, wield, take, eat, drink, emote, search, hide, unhide,
   pick_lock
