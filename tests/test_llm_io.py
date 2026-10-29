@@ -116,6 +116,16 @@ class TestLlmIo():
         assert request_body['response_format']['type'] == 'json_schema'
         assert request_body['response_format']['json_schema']['name'] == 'FollowSchema'
 
+    def test_parse_result_strips_thinking(self):
+        config_file = self._load_config()
+        config_file['BACKEND'] = 'llama_cpp'
+        io_util = IoUtil(config=config_file, backend_config=self._load_backend_config('llama_cpp'))
+        for thinking in ('<thought>Brita is sad.\nShe mixes Swedish.</thought>', '<think>plan the answer</think>\n'):
+            result = json.dumps({'choices': [{'message': {'content': thinking + 'Min lilla Nils...'}}]})
+            assert io_util.io_adapter.parse_result(result) == 'Min lilla Nils...'
+        result = json.dumps({'choices': [{'message': {'content': 'no thinking here'}}]})
+        assert io_util.io_adapter.parse_result(result) == 'no thinking here'
+
     @responses.activate
     def test_structured_request_koboldcpp(self):
         config_file = self._load_config()
