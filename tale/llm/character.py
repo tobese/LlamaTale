@@ -1,7 +1,7 @@
 from copy import deepcopy
 import json
 
-from tale import json_util, parse_utils
+from tale import json_util, parse_utils, util
 from tale.base import Location
 from tale.llm import llm_config
 from tale.llm.character_card import CharacterCard
@@ -56,7 +56,7 @@ class CharacterBuilding():
             new_sentiment = model.sentiment if model.sentiment else None
             item = model.give if isinstance(model.give, str) else None
         except Exception as exc:
-            print(f'Failed to parse dialogue {exc}')
+            util._get_crash_logger().warning('Failed to parse dialogue: %s', exc)
             return None, None, None
 
         return text, item, new_sentiment

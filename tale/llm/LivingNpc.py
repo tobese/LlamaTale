@@ -4,7 +4,6 @@ from tale.llm.item_handling_result import ItemHandlingResult
 import tale.llm.llm_cache as llm_cache
 from tale import lang, mud_context
 from tale.base import ContainingType, Living, ParseResult
-from tale.errors import LlmResponseException
 from tale.llm.responses.ActionResponse import ActionResponse
 from tale.llm.responses.FollowResponse import FollowResponse
 from tale.player import Player
@@ -174,7 +173,9 @@ class LivingNpc(Living):
                         self.avatar = self.name
                 break
         if not response:
-            raise LlmResponseException("Failed to parse dialogue")
+            # the backend gave no usable dialogue (errors are in the crash log); stay in the fiction
+            self.tell_others("{Actor} stares at {target}, lips moving, but no words come.", target=actor)
+            return
 
         tell_hash = llm_cache.cache_event('{actor.title} says: {response}'.format(actor=self, response=unpad_text(response)))
         self._observed_events.append(tell_hash)

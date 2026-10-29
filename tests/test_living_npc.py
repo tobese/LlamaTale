@@ -211,6 +211,15 @@ class TestLivingNpcActions():
         assert ["test : Hello there, how can I assist you today?\n\n"] == self.msg_trace_npc.messages
 
     @responses.activate
+    def test_do_say_unparseable_dialogue(self):
+        # e.g. a model looping until max tokens: no valid JSON in any of the retries
+        responses.add(responses.POST, self.dummy_backend_config['URL'] + self.dummy_backend_config['ENDPOINT'],
+                  json={'results':[{'text':'{"response": "eyes, eyes, eyes, eyes,'}]}, status=200)
+        self.npc.do_say(what_happened='something', actor=self.npc2)
+        assert ["Test stares at actor, lips moving, but no words come."] == self.msg_trace_npc.messages
+        assert 'actor' not in self.npc.sentiments
+
+    @responses.activate
     def test_idle_action(self):
         mud_context.config.server_tick_method = 'TIMER'
         self.npc.autonomous = False
