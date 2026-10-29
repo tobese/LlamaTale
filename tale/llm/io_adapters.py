@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 import asyncio
 import json
+import re
 import time
 
 import aiohttp
@@ -9,6 +10,9 @@ import requests
 
 from tale.errors import LlmResponseException
 from tale.player import PlayerConnection
+
+# reasoning models (Gemma 4: <thought>, Qwen3/DeepSeek-R1: <think>) may put their thinking in the content
+_THINKING_BLOCK = re.compile(r'<(thought|think)>.*?</\1>\s*', re.DOTALL)
 
 
 class AbstractIoAdapter(ABC):
@@ -142,9 +146,10 @@ class LlamaCppAdapter(AbstractIoAdapter):
     def parse_result(self, result: str) -> str:
         """ Parse the result from the stream endpoint """
         try:
-            return json.loads(result)['choices'][0]['message']['content']
+            content = json.loads(result)['choices'][0]['message']['content']
         except:
             raise LlmResponseException("Error parsing result from backend")
+        return _THINKING_BLOCK.sub('', content)
    
     def set_prompt(self, request_body: dict, prompt: str, context: str = '') -> dict:
         if self.system_start_prompt:
