@@ -126,6 +126,12 @@ class Player(base.Living, pubsub.Listener):
                 short = False
         if self.location:
             self.known_locations.add(self.location)
+            if evoke and not short:
+                # only the room itself is evoked: it reads the same for every player and visit, so the
+                # generated text is cached and shared, while who and what is here is told as is
+                self.tell('\n'.join(self.location.look_room()), end=True, evoke=True)
+                self.tell('\n'.join(self.location.look_contents(exclude_living=self)), end=True)
+                return
             look_paragraphs = self.location.look(exclude_living=self, short=short)
             look_text = '\n'.join(look_paragraphs)
             self.tell(look_text, end=True, evoke=evoke)

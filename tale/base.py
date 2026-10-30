@@ -811,6 +811,11 @@ class Location(MudObject):
                     paragraphs.append("Present here: " + lang.join(living_names))
             return paragraphs
         # normal (long) output
+        return paragraphs[:1] + self.look_room() + self.look_contents(exclude_living)
+
+    def look_room(self) -> List[str]:
+        """the paragraphs that describe the room itself (description and exits), the same for everyone who looks"""
+        paragraphs = []  # type: List[str]
         if self.description:
             paragraphs.append(self.description)
         if self.roleplay_description:
@@ -824,6 +829,11 @@ class Location(MudObject):
                     exits_seen.add(exit)
                     exit_paragraph.append(exit.look_description)
             paragraphs.append(" ".join(exit_paragraph))
+        return paragraphs
+
+    def look_contents(self, exclude_living: 'Living'=None) -> List[str]:
+        """the paragraphs that describe the items and livings here, possibly excluding one living"""
+        paragraphs = []  # type: List[str]
         items_and_livings = []  # type: List[str]
         items_with_short_descr = [item for item in self.items if item.look_description and item.visible and not item.hidden]
         items_without_short_descr = [item for item in self.items if not item.look_description and item.visible and not item.hidden]
