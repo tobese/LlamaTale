@@ -245,6 +245,25 @@ class TestCommands(unittest.TestCase):
         self.assertEqual({"verb2"}, set(wiz.keys()))
 
 
+class TestLimboReaper(unittest.TestCase):
+    def test_reaper_spares_players_still_logging_in(self):
+        d = FakeDriver()
+        reaper = tale.driver_mud.LimboReaper()
+        tale.base._limbo.insert(reaper, None)
+        connecting = Player("<connecting_1>", "n")
+        lingering = Player("erik", "m")
+        try:
+            for player in (connecting, lingering):
+                player.location = tale.base._limbo
+                conn = PlayerConnection(player)
+                d.all_players[player.name] = conn
+            reaper.do_reap_souls(tale.util.Context(d, None, None, None))
+            self.assertNotIn(connecting, reaper.candidates)
+            self.assertIn(lingering, reaper.candidates)
+        finally:
+            tale.base._limbo.remove(reaper, None)
+
+
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
