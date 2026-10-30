@@ -12,7 +12,7 @@ def unpad_text(text: str) -> str:
     return text.replace('<:>', ':')
 
 def check_file_exists_in_resources(file_name) -> str:
-    file_path = os.path.join(os.path.dirname('../../tale/web/resources/'), file_name + '.jpg')
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'web', 'resources', file_name + '.jpg')
     if os.path.exists(file_path):
         return file_name
     return None
