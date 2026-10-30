@@ -419,6 +419,8 @@ class LimboReaper(base.Living):
             return
         in_limbo = {living for living in self.location.livings if living is not self}
         in_limbo.update({conn.player for conn in ctx.driver.all_players.values() if conn.player.location is base._limbo})
+        # players still logging in or creating a character are left alone; idle disconnects deal with abandoned ones
+        in_limbo = {living for living in in_limbo if not living.name.startswith("<connecting_")}
         now = time.time()
         for candidate in in_limbo:
             if candidate not in self.candidates:
