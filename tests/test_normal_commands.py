@@ -226,3 +226,20 @@ class TestExamineCommand():
 
         with pytest.raises(ActionRefused, match="You don't have enough action points to pick the lock."):
             normal.do_pick_lock(self.test_player, parse_result, self.context)
+
+class TestSayCommand():
+
+    context = tale.mud_context
+    context.config = StoryConfig()
+
+    def setup_method(self):
+        tale.mud_context.driver = FakeDriver()
+        self.test_player = Player('player', 'f')
+        self.location = Location('test_location')
+        self.location.insert(self.test_player, actor=None)
+
+    def test_say_reaches_others_verbatim(self):
+        calls = []
+        self.test_player.tell_others = lambda message, **kwargs: calls.append((message, kwargs))
+        normal.do_say(self.test_player, ParseResult(verb='say', unparsed='hello there.'), tale.mud_context)
+        assert calls == [('{Actor} says: hello there.', {'evoke': False, 'short_len': False})]
