@@ -4,7 +4,7 @@ import shutil
 
 dialogue_splitter = ' &lt;:&gt; '
 
-web_resources_path = '../../tale/web' # the game is run from the stories directory
+web_resources_path = os.path.dirname(os.path.abspath(__file__))  # the web folder of the tale package, wherever the game is run from
 resource_folder = 'resources'
 static_folder = 'static/resources'
 
