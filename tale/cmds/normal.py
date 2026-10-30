@@ -921,7 +921,8 @@ def do_say(player: Player, parsed: base.ParseResult, ctx: util.Context) -> None:
                 message = " ".join(words[count:])
                 break
     player.tell("You say%s: %s" % (target, message), evoke=False, short_len=False)
-    player.tell_others("{Actor} says%s: %s" % (target, message), evoke=True, short_len=False)
+    # other players hear the words as spoken; evoking them makes the LLM narrate (and embellish) the speech
+    player.tell_others("{Actor} says%s: %s" % (target, message), evoke=False, short_len=False)
 
 
 @cmd("wait")

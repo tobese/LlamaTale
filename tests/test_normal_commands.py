@@ -255,3 +255,9 @@ class TestSayCommand():
     def test_say_without_target(self):
         normal.do_say(self.test_player, ParseResult(verb='say', unparsed='hello'), self.context)
         assert self.listener.messages == ['Player says: hello.']
+
+    def test_say_reaches_others_verbatim(self):
+        calls = []
+        self.test_player.tell_others = lambda message, **kwargs: calls.append((message, kwargs))
+        normal.do_say(self.test_player, ParseResult(verb='say', unparsed='hello there.'), tale.mud_context)
+        assert calls == [('{Actor} says: hello there.', {'evoke': False, 'short_len': False})]
