@@ -216,6 +216,17 @@ class TestPlayer(unittest.TestCase):
         player.look(short=True, evoke=False)
         self.assertEqual(self._concat_list(["[Attic]", "Present here: julie\n"]), player.test_get_output_paragraphs())
 
+    def test_look_evokes_only_the_room(self):
+        player = Player("fritz", "m")
+        attic = Location("Attic", "A dark attic.")
+        julie = Living("julie", "f")
+        julie.move(attic, silent=True)
+        player.move(attic, silent=True)
+        told = []
+        player.tell = lambda message, end=False, evoke=False: told.append((message, evoke))
+        player.look()
+        self.assertEqual([("A dark attic.", True), ("Julie is here.", False)], told)
+
     def test_look_brief(self):
         player = Player("fritz", "m")
         attic = Location("Attic", "A dark attic.")
